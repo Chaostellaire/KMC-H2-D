@@ -7,17 +7,17 @@ TO DO :
 - make a cool visualisation of the H displacement
 
 """
-import numpy as np 
+import numpy as np
 
 
-def init_parameters() -> None:
-    global GAMMA, GAMMA1, GAMMA2
-    GAMMA1 = 1/2 
-    GAMMA2 = 1/2 
-    GAMMA = GAMMA1+GAMMA2
+def init_parameters(Parameters : dict) -> None:
+    global GAMMA1, GAMMA2
+    GAMMA1 = Parameters["GAMMA1_SHARE"]
+    GAMMA2 = 1-Parameters["GAMMA1_SHARE"] 
+    
 
-def trajectory(steps : int) -> np.ndarray :
-    trajectory_vector = np.zeros((steps+1,2), dtype = int)
+def trajectory(Parameters: dict) -> np.ndarray :
+    trajectory_vector = np.zeros((Parameters["steps"]+1,2), dtype = int)
     current_step = 1
     """
     We create the directions array that stores any possibilities with that diffusion mechanism, i.e 
@@ -26,9 +26,9 @@ def trajectory(steps : int) -> np.ndarray :
 
     """
     directions = np.array([[(1,0),(0,1),(-1,0),(0,-1)], [(1,1),(1,-1),(-1,1),(-1,-1)]])
-    while current_step<=steps :
+    while current_step<=Parameters["steps"]:
         rdmvalue = np.random.rand()
-        if GAMMA*rdmvalue < GAMMA1 :
+        if rdmvalue < GAMMA1 :
             # We choose to go in the <1 0> direction i.e., +x -x +y -y
             x_random, y_random = directions[0][np.random.choice(4)]
             trajectory_vector[current_step] = trajectory_vector[current_step-1] + [x_random, y_random]
@@ -44,6 +44,3 @@ def trajectory(steps : int) -> np.ndarray :
 
 
 
-if __name__ == "__main__" :
-    init_parameters()
-    print(trajectory(10))
