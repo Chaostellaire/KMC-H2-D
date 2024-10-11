@@ -1,5 +1,6 @@
 """
-kinmontecarlo.py : Short for Kinetic Monte Carlo method, will hold the computation of the trajectory of the H atom.
+kinmontecarlo.py : Short for Kinetic Monte Carlo method, will hold the computation of the trajectory of the H atom. 
+DOES ONLY COMPUTATIONS.
 Chaostellaire : Harmonie, 
 
 TO DO : 
@@ -38,6 +39,8 @@ def trajectory(Parameters: dict) -> np.ndarray :
             trajectory_vector[current_step] = trajectory_vector[current_step-1] + [x_random, y_random]
         current_step += 1
     return trajectory_vector
+
+
 
 
 
