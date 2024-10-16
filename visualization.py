@@ -35,7 +35,7 @@ def animate_simulation(L, Parameters):
             # Animation function
             def animate(i):
                 x, y = L[i]
-                atom.set_data(x, y)
+                atom.set_data([x], [y])
                 return atom,
 
             # Initialize writer for saving the video
