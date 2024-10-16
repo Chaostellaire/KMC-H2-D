@@ -30,16 +30,13 @@ Parameters = {
     "b" : 0.3,
 
     #~~ SIMULATION VARIABLES ~~
-    "steps" : 10000, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
+    "steps" : 100, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
     
-    
-    
-
     #~~ SAVING PROPERTIES ~~#
     "table save flag" : True,
     "saving type" : ".npy" , #str, gives the format of saving of the tables. .npy is recommanded #### ".npy",  ".dat", ".txt"
     
-    "steps" : 100, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
+    "steps" : 300, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
 
     #~~ VISUALIZATION ~~
     "visu" : True, #bool 
@@ -48,12 +45,7 @@ Parameters = {
 }
 
 
-
-
-
-
 KMC.init_parameters(Parameters)
-L = KMC.trajectory(Parameters)
 
 if Parameters["Model"] == 1:
     L = KMC.trajectory_1(Parameters)
@@ -71,13 +63,11 @@ if Parameters["visu"] :
 visu.Diffusion_plot(Parameters,L)
 
 
-
 """
 D_computed = KMC.computeDiffusion_normalized(L,Parameters)
 D_computed = KMC.MQV(L,20) / 80
 print("Ds are : ")
 print("real value = {}  ||| computed value = {}".format(D_true, D_computed))
-
 """
 
 
