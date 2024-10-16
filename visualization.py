@@ -21,10 +21,6 @@ def animate_simulation(L : np.ndarray, Parameters : dict) -> None:
         atom, = ax.plot([], [], 'ro')  # Red dot for the atom
 
         # Set grid lines
-        ax.set_xticks(range(x_min, x_max + 1))
-        ax.set_yticks(range(y_min, y_max + 1))
-        ax.grid(True)
-        # Set grid lines
         m = round(min(x_min, y_min))-1
         M = round(max(x_max, y_max))+1
         ax.set_xticks(range(m, M + 1))
