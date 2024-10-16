@@ -17,12 +17,21 @@ Parameters = {
     
     #~~ SIMULATION VARIABLES ~~
     "steps" : 100, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
+    
+    
+    #~~ SAVING PROPERTIES ~~#
+    "table save flag" : True,
+    "saving type" : ".npy" , #str, gives the format of saving of the tables. .npy is recommanded #### ".npy",  ".dat", ".txt"
+    "table save path" : "./saves/tables/" , #path
+    
+    
+    
 }
 
 
 
 KMC.init_parameters(Parameters)
-print(KMC.trajectory(Parameters)[70:100])
+print(KMC.trajectory(Parameters)[0][70:100])
 
 
 
