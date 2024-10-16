@@ -10,10 +10,6 @@ TO DO :
 import numpy as np
 
 
-def init_parameters(Parameters : dict) -> None:
-    global GAMMA1, GAMMA2
-    GAMMA1 = Parameters["GAMMA1_SHARE"]
-    GAMMA2 = 1-Parameters["GAMMA1_SHARE"] 
     
 
 def trajectory(Parameters: dict) -> np.ndarray :
@@ -28,7 +24,7 @@ def trajectory(Parameters: dict) -> np.ndarray :
     directions = np.array([[(1,0),(0,1),(-1,0),(0,-1)], [(1,1),(1,-1),(-1,1),(-1,-1)]])
     while current_step<=Parameters["steps"]:
         rdmvalue = np.random.rand()
-        if rdmvalue < GAMMA1 :
+        if rdmvalue < Parameters["GAMMA1_SHARE"] :
             # We choose to go in the <1 0> direction i.e., +x -x +y -y
             x_random, y_random = directions[0][np.random.choice(4)]
             trajectory_vector[current_step] = trajectory_vector[current_step-1] + [x_random, y_random]
