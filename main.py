@@ -14,23 +14,33 @@ import matplotlib.animation as animation
 
 
 Parameters = {
+
+    "Model" : 2,
+
     #~~ OVERALL SYSTEM PROPERTIES ~~
     
     "GAMMA" : 1, #float, dimensionnal value for GAMMAs. [Hz]
-    "GAMMA1_SHARE" : 0.5, #float, GAMMA1/GAMMA, share of GAMMA1, GAMMA2_share = 1-GAMMA1/GAMMA. To get back to dimensionnal values we just need to multiply by GAMMA.
+    "GAMMA1_SHARE" : 0.1, #float, GAMMA1/GAMMA, share of GAMMA1, GAMMA2_share = 1-GAMMA1/GAMMA. To get back to dimensionnal values we just need to multiply by GAMMA.
     
+    "a" : 1,
+    "b" : 0.3,
+
     #~~ SIMULATION VARIABLES ~~
-    "steps" : 100, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
+    "steps" : 5000, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
 
     #~~ VISUALIZATION ~~
     "visu" : True, 
-    "fps"  : 12,
+    "fps"  : 24,
 }
 
 
 
 KMC.init_parameters(Parameters)
-L = KMC.trajectory(Parameters)
+
+if Parameters["Model"] == 1:
+    L = KMC.trajectory_1(Parameters)
+if Parameters["Model"] == 2:  
+    L = [sublist[0] for sublist in KMC.trajectory_2(Parameters)]
 
 visu.animate_simulation(L, Parameters)
 

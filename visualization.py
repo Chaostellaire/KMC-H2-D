@@ -19,8 +19,10 @@ def animate_simulation(L, Parameters):
             atom, = ax.plot([], [], 'ro')  # Red dot for the atom
 
             # Set grid lines
-            ax.set_xticks(range(x_min, x_max + 1))
-            ax.set_yticks(range(y_min, y_max + 1))
+            m = round(min(x_min, y_min))-1
+            M = round(max(x_max, y_max))+1
+            ax.set_xticks(range(m, M + 1))
+            ax.set_yticks(range(m, M + 1))
             ax.grid(True)
 
             # Add x and y axis lines crossing at (0, 0)
@@ -43,8 +45,7 @@ def animate_simulation(L, Parameters):
 
             # Create the animation
             ani = animation.FuncAnimation(fig, animate, frames=len(L), init_func=init, blit=True)
-            #ani = animation.FuncAnimation(fig, animate, frames=len(L), init_func=init, blit=True, interval=300)
-
+            
             # Save the animation
             ani.save(f"anim_steps{Parameters['steps']}_fps{Parameters['fps']}.mp4", writer=writervideo)
 
