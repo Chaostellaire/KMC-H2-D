@@ -52,7 +52,7 @@ def trajectory_2(Parameters: dict) -> np.ndarray :
         current_direction = trajectory_vector[current_step-1][1]
 
         rdmvalue = np.random.rand()
-        if rdmvalue < GAMMA1 :
+        if rdmvalue < Parameters["GAMMA1_SHARE"] :
             # We choose to jump by making a hopping between the two O atoms
             new_position = current_position + current_direction*(a-2*b)
             new_direction = -current_direction
