@@ -6,6 +6,12 @@ TO DO:
 -  
 """
 import kinmontecarlo as KMC;
+import visualization as visu
+
+import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+
 
 Parameters = {
     #~~ OVERALL SYSTEM PROPERTIES ~~
@@ -15,12 +21,26 @@ Parameters = {
     
     #~~ SIMULATION VARIABLES ~~
     "steps" : 100, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
+
+    #~~ VISUALIZATION ~~
+    "visu" : True, 
+    "fps"  : 12,
 }
 
 
 
 KMC.init_parameters(Parameters)
-print(KMC.trajectory(Parameters)[70:100])
+L = KMC.trajectory(Parameters)
+
+visu.animate_simulation(L, Parameters)
+
+
+
+
+
+
+
+
 
 
 
