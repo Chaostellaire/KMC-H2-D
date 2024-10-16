@@ -9,6 +9,10 @@ TO DO:
 import kinmontecarlo as KMC;
 import visualization as visu
 
+import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+import savings as savs
 import numpy as np
 
 
@@ -26,6 +30,10 @@ Parameters = {
     "b" : 0.3,
 
     #~~ SIMULATION VARIABLES ~~
+    "steps" : 10000, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
+    
+    
+    
 
     #~~ SAVING PROPERTIES ~~#
     "table save flag" : True,
@@ -36,26 +44,41 @@ Parameters = {
     #~~ VISUALIZATION ~~
     "visu" : True, #bool 
     "fps"  : 12, #int
+    "D_computation" : True, #bool
 }
 
 
 
+
+
+
 KMC.init_parameters(Parameters)
+L = KMC.trajectory(Parameters)
+
 if Parameters["Model"] == 1:
     L = KMC.trajectory_1(Parameters)
 if Parameters["Model"] == 2:  
     L = np.array([sublist[0] for sublist in KMC.trajectory_2(Parameters)])
+
+if Parameters["table save flag"] :
+    savs.save2file(Parameters,L)
 
 if Parameters["visu"] :
     visu.animate_simulation(L, Parameters)
 
 #check for D vallidity
 
-D_true = 0.25 * (Parameters["GAMMA1_SHARE"]*1+(1-Parameters["GAMMA1_SHARE"])*2)
+visu.Diffusion_plot(Parameters,L)
+
+
+
+"""
 D_computed = KMC.computeDiffusion_normalized(L,Parameters)
 D_computed = KMC.MQV(L,20) / 80
 print("Ds are : ")
 print("real value = {}  ||| computed value = {}".format(D_true, D_computed))
+
+"""
 
 
 

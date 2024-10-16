@@ -96,9 +96,9 @@ def computeDiffusion_normalized(trajectory_vector:np.ndarray, Parameters: dict) 
     Computes a mean value of D/Gamma we need to recover : D = 1/4 (Gamma1 d1² + Gamma2 d2²)
     """
     D_storage = 0.0
-    for k_steps in range(1,Parameters["steps"]):
+    for k_steps in range(1,Parameters["steps"]+1):
         D_storage += MQV(trajectory_vector, k_steps) / (4*k_steps)
-    return D_storage / (Parameters["steps"]-1)
+    return D_storage / (Parameters["steps"])
 
 
 
