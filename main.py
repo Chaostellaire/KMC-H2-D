@@ -13,30 +13,36 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import savings as savs
 from time import time
+import numpy as np
 
 
 Parameters = {
+
+    "Model" : 2,
+
     #~~ OVERALL SYSTEM PROPERTIES ~~
     
     "GAMMA" : 1, #float, dimensionnal value for GAMMAs. [Hz]
     "GAMMA1_SHARE" : 0.25, #float, GAMMA1/GAMMA, share of GAMMA1, GAMMA2_share = 1-GAMMA1/GAMMA. To get back to dimensionnal values we just need to multiply by GAMMA.
     "lattice parameter" : 3., #float, refers to a, usefull only to get dimensionnal numbers back.
     
+    "a" : 1,
+    "b" : 0.3,
+
     #~~ SIMULATION VARIABLES ~~
     "steps" : 10000, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
     
     
     
+
     #~~ SAVING PROPERTIES ~~#
     "table save flag" : True,
     "saving type" : ".npy" , #str, gives the format of saving of the tables. .npy is recommanded #### ".npy",  ".dat", ".txt"
-    "table save path" : "./saves/tables/" , #path
     
-    
-    
+    "steps" : 100, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
 
     #~~ VISUALIZATION ~~
-    "visu" : False, #bool 
+    "visu" : True, #bool 
     "fps"  : 12, #int
     "D_computation" : True, #bool
 }
@@ -48,10 +54,18 @@ start = time()
 
 L = KMC.trajectory(Parameters)
 print("computation of trajectory done at {}".format(time() - start))
+
+if Parameters["Model"] == 1:
+    L = KMC.trajectory_1(Parameters)
+if Parameters["Model"] == 2:  
+    L = np.array([sublist[0] for sublist in KMC.trajectory_2(Parameters)])
+
 if Parameters["table save flag"] :
     savs.save2file(Parameters,L)
+
 if Parameters["visu"] :
     visu.animate_simulation(L, Parameters)
+
 #check for D vallidity
 
 visu.Diffusion_plot(Parameters,L)

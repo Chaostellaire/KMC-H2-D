@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
 from kinmontecarlo import MQV
+import os
 
 def animate_simulation(L : np.ndarray, Parameters : dict) -> None:
         # Create the figure and axis
@@ -23,6 +24,12 @@ def animate_simulation(L : np.ndarray, Parameters : dict) -> None:
         ax.set_xticks(range(x_min, x_max + 1))
         ax.set_yticks(range(y_min, y_max + 1))
         ax.grid(True)
+            # Set grid lines
+            m = round(min(x_min, y_min))-1
+            M = round(max(x_max, y_max))+1
+            ax.set_xticks(range(m, M + 1))
+            ax.set_yticks(range(m, M + 1))
+            ax.grid(True)
 
         # Add x and y axis lines crossing at (0, 0)
         ax.axhline(0, color='black',linewidth=0.5)
@@ -48,6 +55,13 @@ def animate_simulation(L : np.ndarray, Parameters : dict) -> None:
 
         # Save the animation
         ani.save(f"anim_steps{Parameters['steps']}_fps{Parameters['fps']}.mp4", writer=writervideo)
+            # Create the animation
+            ani = animation.FuncAnimation(fig, animate, frames=len(L), init_func=init, blit=True)
+            
+            # Save the animation
+            directory_path = f"GAMMA1_SHARE_{Parameters['GAMMA1_SHARE']}"
+            os.makedirs(directory_path, exist_ok=True)
+            ani.save(f"{directory_path}/anim_steps{Parameters['steps']}_fps{Parameters['fps']}.mp4", writer=writervideo)
 
 def Diffusion_plot(Parameters : dict, trajectory_vector : np.ndarray) -> None :
     D_true = 0.25 * (Parameters["GAMMA1_SHARE"]*1+(1-Parameters["GAMMA1_SHARE"])*2)

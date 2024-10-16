@@ -1,15 +1,17 @@
 import numpy as np
 import matplotlib.pyplot as plt
-
+import os
 
 
         
 def save2file(Parameters:dict, arraytosave:np.ndarray) -> None :
-    print("saving location is {}".format(Parameters["table save path"] + "last_path" + Parameters["saving type"]))
+    directory_path = f"GAMMA1_SHARE_{Parameters['GAMMA1_SHARE']}"
+    os.makedirs(directory_path, exist_ok=True)
+    print(f"saving location is {directory_path}")
     if Parameters["saving type"] == ".npy" :
-        np.save(Parameters["table save path"] + "last_path", arraytosave)
+        np.save(f"{directory_path}/step_{Parameters['steps']}.{Parameters['saving type']}", arraytosave)
     elif Parameters["saving type"] == ".txt" :
-        np.savetxt(Parameters["table save path"] + "last_path", arraytosave)
+        np.savetxt(f"{directory_path}/step_{Parameters['steps']}.{Parameters['saving type']}", arraytosave)
     else :
         print("NOT IMPLEMENTED EXTENSION")
     
