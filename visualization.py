@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import os
 
 def animate_simulation(L, Parameters):
         if Parameters['visu']:
@@ -37,7 +38,7 @@ def animate_simulation(L, Parameters):
             # Animation function
             def animate(i):
                 x, y = L[i]
-                atom.set_data(x, y)
+                atom.set_data([x], [y])
                 return atom,
 
             # Initialize writer for saving the video
@@ -47,6 +48,8 @@ def animate_simulation(L, Parameters):
             ani = animation.FuncAnimation(fig, animate, frames=len(L), init_func=init, blit=True)
             
             # Save the animation
-            ani.save(f"anim_steps{Parameters['steps']}_fps{Parameters['fps']}.mp4", writer=writervideo)
+            directory_path = f"GAMMA1_SHARE_{Parameters['GAMMA1_SHARE']}"
+            os.makedirs(directory_path, exist_ok=True)
+            ani.save(f"{directory_path}/anim_steps{Parameters['steps']}_fps{Parameters['fps']}.mp4", writer=writervideo)
 
         
