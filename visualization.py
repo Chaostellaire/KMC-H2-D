@@ -6,6 +6,7 @@ import os
 
 def animate_simulation(L : np.ndarray, Parameters : dict) -> None:
         # Create the figure and axis
+        print("HELLO")
         fig, ax = plt.subplots()
 
         # Set limits for the grid centered at (0, 0)
@@ -54,16 +55,31 @@ def animate_simulation(L : np.ndarray, Parameters : dict) -> None:
         ani.save(f"{directory_path}/anim_steps{Parameters['steps']}_fps{Parameters['fps']}.mp4", writer=writervideo)
 
 def Diffusion_plot(Parameters : dict, trajectory_vector : np.ndarray) -> None :
-    D_true = 0.25 * (Parameters["GAMMA1_SHARE"]*1+(1-Parameters["GAMMA1_SHARE"])*2)
+    D_true = (Parameters["GAMMA1_SHARE"]*1+(1-Parameters["GAMMA1_SHARE"])*2) 
     D_true_table = np.ones((Parameters["steps"],))* D_true
     #O(n²)
-    D_compute = [MQV(trajectory_vector, k)/(4*k) for k in range(1,Parameters["steps"]+1)]
-    D_moyen = np.ones((Parameters['steps']))* np.mean(D_compute)
-    fig, ax = plt.subplots()
-    ax.plot(D_true_table, label ="Real D value")
-    ax.plot(D_compute, label = "D_computed")
-    ax.plot(D_moyen, label = "mean")
-    ax.set_ylim(0,max(D_compute)*1.1)
+    n = trajectory_vector.shape[0]
+    taken_steps = np.linspace(1, n, 100, dtype = int)
+    #taken_steps = np.linspace(0.2*n,0.8*n,100, dtype = int)
+    MQV_compute = [MQV(trajectory_vector, k) for k in taken_steps]
+    D_moyen = np.ones((Parameters['steps']))* np.mean(np.divide(MQV_compute, taken_steps*4))
+    #to print we multiply 4Dt where t is adimensional so : t = step_number
+    steps_relevant = np.arange(1, n, 1)
+    MQV_true_table = np.multiply(D_true_table, np.arange(1, n, 1))
+
+
+    
+    
+    fig, ax = plt.subplots(figsize = (16,9))
+    ax.set_xlim(1,n)
+    ax.plot(np.arange(1, n, 1), MQV_true_table, label ="Real <[x(t0-t)-x(t0)]²> value", color = "blue", 
+            linestyle = "solid")
+    #
+    ax.plot(taken_steps,MQV_compute, label = "Computed <[x(t0-t)-x(t0)]²> value", color = 'red', 
+            linestyle = "dotted", marker = "^")
+    #
+    #ax.plot(D_moyen, label = "mean")
+    #ax.set_ylim(0,max(D_moyen)*1.1)
     ax.legend()
     plt.show()
     
