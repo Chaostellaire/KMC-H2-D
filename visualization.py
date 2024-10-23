@@ -55,17 +55,18 @@ def animate_simulation(L : np.ndarray, Parameters : dict) -> None:
         ani.save(f"{directory_path}/anim_steps{Parameters['steps']}_fps{Parameters['fps']}.mp4", writer=writervideo)
 
 def Diffusion_plot(Parameters : dict, trajectory_vector : np.ndarray) -> None :
-    D_true = (Parameters["GAMMA1_SHARE"]*1+(1-Parameters["GAMMA1_SHARE"])*2) 
-    D_true_table = np.ones((Parameters["steps"],))* D_true
+    if Parameters["Model"] == 1:
+        D_true = 1/4*(Parameters["GAMMA1_SHARE"]*1+(1-Parameters["GAMMA1_SHARE"])*2) 
+    else :
+        D_true = 1/4*(Parameters["GAMMA1_SHARE"]*(1-Parameters["GAMMA1_SHARE"]))*(Parameters["a"]-2*Parameters["b"]**2)
+        
     #O(n²)
     n = trajectory_vector.shape[0]
-    taken_steps = np.linspace(1, n, 100, dtype = int)
+    taken_steps = np.linspace(1, n+1, 100, dtype = int)
     #taken_steps = np.linspace(0.2*n,0.8*n,100, dtype = int)
     MQV_compute = [MQV(trajectory_vector, k) for k in taken_steps]
-    D_moyen = np.ones((Parameters['steps']))* np.mean(np.divide(MQV_compute, taken_steps*4))
     #to print we multiply 4Dt where t is adimensional so : t = step_number
-    steps_relevant = np.arange(1, n, 1)
-    MQV_true_table = np.multiply(D_true_table, np.arange(1, n, 1))
+    MQV_true_table = np.multiply(4*D_true, np.arange(1, n, 1))
 
 
     

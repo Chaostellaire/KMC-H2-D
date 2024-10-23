@@ -18,12 +18,12 @@ import numpy as np
 
 Parameters = {
 
-    "Model" : 1,
+    "Model" : 2,
 
     #~~ OVERALL SYSTEM PROPERTIES ~~
     
     "GAMMA" : 1, #float, dimensionnal value for GAMMAs. [Hz]
-    "GAMMA1_SHARE" : 0.25, #float, GAMMA1/GAMMA, share of GAMMA1, GAMMA2_share = 1-GAMMA1/GAMMA. To get back to dimensionnal values we just need to multiply by GAMMA.
+    "GAMMA1_SHARE" : 0.95, #float, GAMMA1/GAMMA, share of GAMMA1, GAMMA2_share = 1-GAMMA1/GAMMA. To get back to dimensionnal values we just need to multiply by GAMMA.
 
     "a" : 1,
     "b" : 0.3,
@@ -39,7 +39,7 @@ Parameters = {
     #~~ VISUALIZATION ~~
     "visu" : True, #bool 
     "fps"  : 12, #int
-    "D_computation" : False, #bool
+    "D_computation" : True, #bool
 }
 
 
@@ -48,11 +48,13 @@ start = time()
 
 
 if Parameters["load a table"] :
-    L = np.load("GAMMA1_SHARE_{}/step_{}.npy".format(Parameters["GAMMA1_SHARE"], Parameters["steps"]))
+    L = np.load("GAMMA1_SHARE_{}/model{}_step_{}.npy".format(Parameters["GAMMA1_SHARE"],Parameters['Model'], Parameters["steps"]))
 else:
     if Parameters["Model"] == 1:
         L = KMC.trajectory_1(Parameters)
-        print("computation of trajectory done at {}".format(time() - start))
+        compute_time = time() - start
+        print("computation of trajectory done at {}".format(compute_time))
+        
     if Parameters["Model"] == 2:  
         L = np.array([sublist[0] for sublist in KMC.trajectory_2(Parameters)])
         compute_time = time() - start
@@ -60,7 +62,7 @@ else:
 
     if Parameters["table save flag"] :
         savs.save2file(Parameters,L)
-        print("time to save : {}s".format(time()-compute_time))
+        print("time to save : {}".format( time()-compute_time ))
 
 if Parameters["visu"] :
     #visu.animate_simulation(L, Parameters)
@@ -71,7 +73,11 @@ if Parameters["visu"] :
 
 if Parameters["D_computation"] : 
     D_computed = KMC.computeDiffusion_normalized(L,Parameters)
-    D_true = 1/4 * (Parameters["GAMMA1_SHARE"] + 2 * (1-Parameters["GAMMA1_SHARE"]))
+
+    if Parameters["Model"] == 1 :
+        D_true = 1/4 * (Parameters["GAMMA1_SHARE"] + 2 * (1-Parameters["GAMMA1_SHARE"]))
+    else :
+        D_true = 1/4*(Parameters["GAMMA1_SHARE"]*(1-Parameters["GAMMA1_SHARE"]))*(Parameters["a"]-2*Parameters["b"]**2)
     print("================================")
     print("Ds are : ")
     print("real value = {}  ||| computed value = {}".format(D_true, D_computed))

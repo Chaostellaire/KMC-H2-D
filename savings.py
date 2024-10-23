@@ -9,9 +9,9 @@ def save2file(Parameters:dict, arraytosave:np.ndarray) -> None :
     os.makedirs(directory_path, exist_ok=True)
     print(f"saving location is {directory_path}")
     if Parameters["saving type"] == "npy" :
-        np.save(f"{directory_path}/step_{Parameters['steps']}.{Parameters['saving type']}", arraytosave)
+        np.save(f"{directory_path}/model{Parameters['Model']}_step_{Parameters['steps']}.{Parameters['saving type']}", arraytosave)
     elif Parameters["saving type"] == "txt" :
-        np.savetxt(f"{directory_path}/step_{Parameters['steps']}.{Parameters['saving type']}", arraytosave)
+        np.savetxt(f"{directory_path}/model{Parameters['Model']}_step_{Parameters['steps']}.{Parameters['saving type']}", arraytosave)
     else :
         print("NOT IMPLEMENTED EXTENSION")
     
