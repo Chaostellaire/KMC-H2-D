@@ -63,9 +63,13 @@ def Diffusion_plot(Parameters : dict, trajectory_vector : np.ndarray) -> None :
         
     #O(n²)
     n = trajectory_vector.shape[0]
-    if Parameters["load mqv"]:
-        MQV_compute= np.load("GAMMA1_SHARE_{}/model{}_step_{}_mqv.npy".format(Parameters["GAMMA1_SHARE"],Parameters['Model'], Parameters["steps"]))[0]
-        taken_steps = np.load("GAMMA1_SHARE_{}/model{}_step_{}_mqv.npy".format(Parameters["GAMMA1_SHARE"],Parameters['Model'], Parameters["steps"]))[1]
+    if Parameters["load mqv"] and Parameters["load traj"]:
+        if Parameters["custom load"]:
+            MQV_compute= np.load(f"GAMMA1_SHARE_{Parameters['GAMMA1_SHARE']}/{Parameters['load path']}_mqv.{Parameters['saving type']}")[0]
+            taken_steps = np.load(f"GAMMA1_SHARE_{Parameters['GAMMA1_SHARE']}/{Parameters['load path']}_mqv.{Parameters['saving type']}")[1]
+        else:
+            MQV_compute= np.load("GAMMA1_SHARE_{}/model{}_step_{}_mqv.npy".format(Parameters["GAMMA1_SHARE"],Parameters['Model'], Parameters["steps"]))[0]
+            taken_steps = np.load("GAMMA1_SHARE_{}/model{}_step_{}_mqv.npy".format(Parameters["GAMMA1_SHARE"],Parameters['Model'], Parameters["steps"]))[1]
     else :
         #taken_steps = np.linspace(100, n+1, 20, dtype = int)
         taken_steps = np.linspace(0.2*n,0.8*n,20, dtype = int)

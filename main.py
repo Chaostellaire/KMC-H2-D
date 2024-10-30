@@ -29,10 +29,11 @@ Parameters = {
     "b" : 0.3,
 
     #~~ SIMULATION VARIABLES ~~
-    "load traj" : False, #bool, need to select correct parameter to load correct table
-    "custom load" : False, #bool
-    "load path" :"", #str
-    "load mqv": False, #bool
+    "load traj" : True, #bool, need to select correct parameter to load correct table
+    "load mqv": False, #bool, will trigger only if a trajectory load is prompted
+    "custom load" : True, #bool, will trigger only if a trajectory load is prompted
+    "load path" :"M2_10M_1", #str
+    
     "steps" : 10000000, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
     
     #~~ SAVING PROPERTIES ~~#
@@ -52,7 +53,10 @@ start = time()
 
 
 if Parameters["load traj"] :
-    L = np.load("GAMMA1_SHARE_{}/model{}_step_{}_traj.npy".format(Parameters["GAMMA1_SHARE"],Parameters['Model'], Parameters["steps"]))
+    if Parameters["custom load"]:
+        L = np.load(f"GAMMA1_SHARE_{Parameters['GAMMA1_SHARE']}/{Parameters['load path']}_traj.{Parameters['saving type']}")
+    else:
+        L = np.load("GAMMA1_SHARE_{}/model{}_step_{}_traj.npy".format(Parameters["GAMMA1_SHARE"],Parameters['Model'], Parameters["steps"]))
 else:
     if Parameters["Model"] == 1:
         L = KMC.trajectory_1(Parameters)
