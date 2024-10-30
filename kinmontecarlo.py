@@ -42,6 +42,7 @@ def trajectory_2(Parameters: dict) -> np.ndarray :
     a = Parameters["a"]
     b = Parameters["b"]
 
+
     trajectory_vector = np.zeros((Parameters["steps"]+1,2,2), dtype = float)
     trajectory_vector[0] = [[b,0], [1,0]]
     current_step = 1
@@ -54,7 +55,7 @@ def trajectory_2(Parameters: dict) -> np.ndarray :
         rdmvalue = np.random.rand()
         if rdmvalue < Parameters["GAMMA1_SHARE"] :
             # We choose to jump by making a hopping between the two O atoms
-            new_position = current_position + current_direction*(a-2*b)
+            new_position = current_position + current_direction *(a-2*b)
             new_direction = -current_direction
         else :
             # We choose to jump by 90° rotating aroung the first neighboring O atom
@@ -79,7 +80,7 @@ def MQV(trajectory_vector : np.ndarray, k_step:int) -> float :
     k_step is related to t = k_step * dt
     """
     n = trajectory_vector.shape[0]
-    result_MQV = 0.0
+    result_MQV = 0
     for j_step in range(n - k_step) :
         position_diff = trajectory_vector[j_step+k_step] - trajectory_vector[j_step]
         result_MQV += np.dot(position_diff, position_diff)

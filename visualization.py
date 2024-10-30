@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
 from kinmontecarlo import MQV
+import savings
 import os
 
 def animate_simulation(L : np.ndarray, Parameters : dict) -> None:
@@ -58,16 +59,16 @@ def Diffusion_plot(Parameters : dict, trajectory_vector : np.ndarray) -> None :
     if Parameters["Model"] == 1:
         D_true = 1/4*(Parameters["GAMMA1_SHARE"]*1+(1-Parameters["GAMMA1_SHARE"])*2) 
     else :
-        D_true = 1/4*(Parameters["GAMMA1_SHARE"]*(1-Parameters["GAMMA1_SHARE"]))*(Parameters["a"]-2*Parameters["b"]**2)
+        D_true = 1/4*(Parameters["GAMMA1_SHARE"]*(1-Parameters["GAMMA1_SHARE"])) * (Parameters['a']-2*Parameters['b'])**2
         
     #O(n²)
     n = trajectory_vector.shape[0]
     taken_steps = np.linspace(1, n+1, 100, dtype = int)
     #taken_steps = np.linspace(0.2*n,0.8*n,100, dtype = int)
-    MQV_compute = [MQV(trajectory_vector, k) for k in taken_steps]
+    MQV_compute = np.array([MQV(trajectory_vector, k) for k in taken_steps])
     #to print we multiply 4Dt where t is adimensional so : t = step_number
     MQV_true_table = np.multiply(4*D_true, np.arange(1, n, 1))
-
+    savings.save2file(Parameters,np.concatenate((MQV_compute,taken_steps),axis = 0),"mqv")
 
     
     

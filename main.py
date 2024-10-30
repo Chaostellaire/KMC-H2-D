@@ -23,21 +23,22 @@ Parameters = {
     #~~ OVERALL SYSTEM PROPERTIES ~~
     
     "GAMMA" : 1, #float, dimensionnal value for GAMMAs. [Hz]
-    "GAMMA1_SHARE" : 0.95, #float, GAMMA1/GAMMA, share of GAMMA1, GAMMA2_share = 1-GAMMA1/GAMMA. To get back to dimensionnal values we just need to multiply by GAMMA.
+    "GAMMA1_SHARE" : 0.03, #float, GAMMA1/GAMMA, share of GAMMA1, GAMMA2_share = 1-GAMMA1/GAMMA. To get back to dimensionnal values we just need to multiply by GAMMA.
 
     "a" : 1,
     "b" : 0.3,
 
     #~~ SIMULATION VARIABLES ~~
     "load a table" : False, #bool, need to select correct parameter to load correct table
-    "steps" : 1000000, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
+    "steps" : 10000000, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
     
     #~~ SAVING PROPERTIES ~~#
     "table save flag" : True,
     "saving type" : "npy" , #str, gives the format of saving of the tables. npy is recommanded #### "npy",  "dat", "txt"
 
     #~~ VISUALIZATION ~~
-    "visu" : True, #bool 
+    "animation" : False, #bool
+    "D_plot" : True, #bool 
     "fps"  : 12, #int
     "D_computation" : True, #bool
 }
@@ -56,18 +57,21 @@ else:
         print("computation of trajectory done at {}".format(compute_time))
         
     if Parameters["Model"] == 2:  
-        L = np.array([sublist[0] for sublist in KMC.trajectory_2(Parameters)])
+        L = KMC.trajectory_2(Parameters)[:,0]
         compute_time = time() - start
         print("computation of trajectory done at {}".format(compute_time))
 
     if Parameters["table save flag"] :
-        savs.save2file(Parameters,L)
+        savs.save2file(Parameters,L,"traj")
         print("time to save : {}".format( time()-compute_time ))
 
-if Parameters["visu"] :
-    #visu.animate_simulation(L, Parameters)
+if Parameters["animation"] :
+    visu.animate_simulation(L, Parameters)
+if Parameters["D_plot"]:
     visu.Diffusion_plot(Parameters,L)
-#check for D vallidity
+    
+    
+#check for D validity
 
 
 
@@ -77,7 +81,7 @@ if Parameters["D_computation"] :
     if Parameters["Model"] == 1 :
         D_true = 1/4 * (Parameters["GAMMA1_SHARE"] + 2 * (1-Parameters["GAMMA1_SHARE"]))
     else :
-        D_true = 1/4*(Parameters["GAMMA1_SHARE"]*(1-Parameters["GAMMA1_SHARE"]))*(Parameters["a"]-2*Parameters["b"]**2)
+        D_true = 1/4*(Parameters["GAMMA1_SHARE"]*(1-Parameters["GAMMA1_SHARE"])) * (Parameters['a']-2*Parameters['b'])
     print("================================")
     print("Ds are : ")
     print("real value = {}  ||| computed value = {}".format(D_true, D_computed))
