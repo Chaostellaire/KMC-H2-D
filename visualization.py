@@ -63,18 +63,21 @@ def Diffusion_plot(Parameters : dict, trajectory_vector : np.ndarray) -> None :
         
     #O(n²)
     n = trajectory_vector.shape[0]
-    taken_steps = np.linspace(1, n+1, 100, dtype = int)
-    #taken_steps = np.linspace(0.2*n,0.8*n,100, dtype = int)
-    MQV_compute = np.array([MQV(trajectory_vector, k) for k in taken_steps])
-    #to print we multiply 4Dt where t is adimensional so : t = step_number
-    MQV_true_table = np.multiply(4*D_true, np.arange(1, n, 1))
-    savings.save2file(Parameters,np.concatenate((MQV_compute,taken_steps),axis = 0),"mqv")
-
-    
+    if Parameters["load mqv"]:
+        MQV_compute= np.load("GAMMA1_SHARE_{}/model{}_step_{}_mqv.npy".format(Parameters["GAMMA1_SHARE"],Parameters['Model'], Parameters["steps"]))[0]
+        taken_steps = np.load("GAMMA1_SHARE_{}/model{}_step_{}_mqv.npy".format(Parameters["GAMMA1_SHARE"],Parameters['Model'], Parameters["steps"]))[1]
+    else :
+        #taken_steps = np.linspace(100, n+1, 20, dtype = int)
+        taken_steps = np.linspace(0.2*n,0.8*n,20, dtype = int)
+        MQV_compute = np.array([MQV(trajectory_vector, k) for k in taken_steps])
+        savings.save2file(Parameters,np.stack((MQV_compute,taken_steps), axis = 1),"mqv")
+           #to print we multiply 4Dt where t is adimensional so : t = step_number
+    MQV_true_table = [4*D_true*1,4*D_true*n]
+            
     
     fig, ax = plt.subplots(figsize = (16,9))
     ax.set_xlim(1,n)
-    ax.plot(np.arange(1, n, 1), MQV_true_table, label ="Real <[x(t0-t)-x(t0)]²> value", color = "blue", 
+    ax.plot([1,n], MQV_true_table, label ="Real <[x(t0-t)-x(t0)]²> value", color = "blue", 
             linestyle = "solid")
     #
     ax.plot(taken_steps,MQV_compute, label = "Computed <[x(t0-t)-x(t0)]²> value", color = 'red', 

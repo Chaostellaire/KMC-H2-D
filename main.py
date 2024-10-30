@@ -29,7 +29,10 @@ Parameters = {
     "b" : 0.3,
 
     #~~ SIMULATION VARIABLES ~~
-    "load a table" : False, #bool, need to select correct parameter to load correct table
+    "load traj" : False, #bool, need to select correct parameter to load correct table
+    "custom load" : False, #bool
+    "load path" :"", #str
+    "load mqv": False, #bool
     "steps" : 10000000, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
     
     #~~ SAVING PROPERTIES ~~#
@@ -40,7 +43,7 @@ Parameters = {
     "animation" : False, #bool
     "D_plot" : True, #bool 
     "fps"  : 12, #int
-    "D_computation" : True, #bool
+    "D_computation" : False, #bool
 }
 
 
@@ -48,8 +51,8 @@ start = time()
 
 
 
-if Parameters["load a table"] :
-    L = np.load("GAMMA1_SHARE_{}/model{}_step_{}.npy".format(Parameters["GAMMA1_SHARE"],Parameters['Model'], Parameters["steps"]))
+if Parameters["load traj"] :
+    L = np.load("GAMMA1_SHARE_{}/model{}_step_{}_traj.npy".format(Parameters["GAMMA1_SHARE"],Parameters['Model'], Parameters["steps"]))
 else:
     if Parameters["Model"] == 1:
         L = KMC.trajectory_1(Parameters)
@@ -81,7 +84,7 @@ if Parameters["D_computation"] :
     if Parameters["Model"] == 1 :
         D_true = 1/4 * (Parameters["GAMMA1_SHARE"] + 2 * (1-Parameters["GAMMA1_SHARE"]))
     else :
-        D_true = 1/4*(Parameters["GAMMA1_SHARE"]*(1-Parameters["GAMMA1_SHARE"])) * (Parameters['a']-2*Parameters['b'])
+        D_true = 1/4*(Parameters["GAMMA1_SHARE"]*(1-Parameters["GAMMA1_SHARE"])) * (Parameters['a']-2*Parameters['b'])**2
     print("================================")
     print("Ds are : ")
     print("real value = {}  ||| computed value = {}".format(D_true, D_computed))

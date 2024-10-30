@@ -8,6 +8,7 @@ TO DO :
 
 """
 import numpy as np
+from time import time
 
 
     
@@ -79,11 +80,14 @@ def MQV(trajectory_vector : np.ndarray, k_step:int) -> float :
     trajectory_vector is the H trajectory,
     k_step is related to t = k_step * dt
     """
+    start = time()
+    print("I'm at step {}".format(k_step))
     n = trajectory_vector.shape[0]
     result_MQV = 0
     for j_step in range(n - k_step) :
         position_diff = trajectory_vector[j_step+k_step] - trajectory_vector[j_step]
         result_MQV += np.dot(position_diff, position_diff)
+    print("I finished in {}".format(time()-start))
     return result_MQV/(n-k_step)
 
 
