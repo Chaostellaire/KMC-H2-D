@@ -36,7 +36,7 @@ def trajectory_1(Parameters: dict) -> np.ndarray :
             trajectory_vector[current_step] = trajectory_vector[current_step-1] + [x_random, y_random]
             choices_vector[current_step-1] = 2
         current_step += 1
-    return trajectory_vector
+    return Parameters["a"]*trajectory_vector
 
 def trajectory_2(Parameters: dict) -> np.ndarray :
 
@@ -101,10 +101,12 @@ def computeDiffusion_normalized(trajectory_vector:np.ndarray, Parameters: dict) 
     # We also exclude the first 20%, because at low time scales the hydrogen didn't mooved that much across the lattice
     # We exclude the last 20% because they have too less point to compute a statifying mean
     n = trajectory_vector.shape[0]
-    taken_steps = np.linspace(0.2*n,0.8*n,100, dtype = int)
+    taken_steps = np.linspace(0.2*n,0.8*n,10, dtype = int)
     for k_step in taken_steps:
         D_storage += MQV(trajectory_vector, k_step) / (4*k_step)
-    return D_storage / 100
+    return D_storage / 10
+
+
 
 
 

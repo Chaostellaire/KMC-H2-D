@@ -29,22 +29,25 @@ Parameters = {
     "b" : 0.3,
 
     #~~ SIMULATION VARIABLES ~~
-    "load traj" : True, #bool, need to select correct parameter to load correct table
+    "load traj" : False, #bool, need to select correct parameter to load correct table
     "load mqv": False, #bool, will trigger only if a trajectory load is prompted
-    "custom load" : True, #bool, will trigger only if a trajectory load is prompted
-    "load path" :"M2_10M_1", #str
+    "custom load" : False, #bool, will trigger only if a trajectory load is prompted
+    "custom save" : False, #bool, will use the structure ./GAMMA1/xxxxx
+    "load path" :"M2_10M_4", #str
     
-    "steps" : 10000000, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
+    "steps" : 20000000, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
+    "several trajectories": False, #bool
+    "number trajectories": 5, #int
     
     #~~ SAVING PROPERTIES ~~#
     "table save flag" : True,
-    "saving type" : "npy" , #str, gives the format of saving of the tables. npy is recommanded #### "npy",  "dat", "txt"
+    "saving type" : "npy", #str, gives the format of saving of the tables. npy is recommanded #### "npy",  "dat", "txt"
 
     #~~ VISUALIZATION ~~
     "animation" : False, #bool
     "D_plot" : True, #bool 
     "fps"  : 12, #int
-    "D_computation" : False, #bool
+    "D_computation" : True, #bool
 }
 
 
@@ -72,27 +75,43 @@ else:
         savs.save2file(Parameters,L,"traj")
         print("time to save : {}".format( time()-compute_time ))
 
+
 if Parameters["animation"] :
     visu.animate_simulation(L, Parameters)
 if Parameters["D_plot"]:
     visu.Diffusion_plot(Parameters,L)
-    
+
+
     
 #check for D validity
 
 
 
 if Parameters["D_computation"] : 
-    D_computed = KMC.computeDiffusion_normalized(L,Parameters)
+    if Parameters["load mqv"]:
+        if Parameters["custom load"]:
+            MQV_computed = np.load(f"GAMMA1_SHARE_{Parameters['GAMMA1_SHARE']}/{Parameters['load path']}_mqv.{Parameters['saving type']}")[0]
+            taken_steps = np.load(f"GAMMA1_SHARE_{Parameters['GAMMA1_SHARE']}/{Parameters['load path']}_mqv.{Parameters['saving type']}")[1]
+            D_computed = np.mean(np.divide(MQV_computed,taken_steps))
+        else:
+            MQV_computed = np.load("GAMMA1_SHARE_{}/model{}_step_{}_mqv.npy".format(Parameters["GAMMA1_SHARE"],Parameters['Model'], Parameters["steps"]))[0]
+            taken_steps = np.load("GAMMA1_SHARE_{}/model{}_step_{}_mqv.npy".format(Parameters["GAMMA1_SHARE"],Parameters['Model'], Parameters["steps"]))[1]
+            
+    else:
+        D_computed = KMC.computeDiffusion_normalized(L,Parameters)
 
     if Parameters["Model"] == 1 :
-        D_true = 1/4 * (Parameters["GAMMA1_SHARE"] + 2 * (1-Parameters["GAMMA1_SHARE"]))
+        D_true = 1/4 * (Parameters["GAMMA1_SHARE"] + 2 * (1-Parameters["GAMMA1_SHARE"]))*Parameters['a']**2
     else :
         D_true = 1/4*(Parameters["GAMMA1_SHARE"]*(1-Parameters["GAMMA1_SHARE"])) * (Parameters['a']-2*Parameters['b'])**2
+        D_eff1 = 1/4*(Parameters["GAMMA1_SHARE"]*(1-Parameters["GAMMA1_SHARE"])) * (Parameters['a']**2-2*Parameters['a']*Parameters['b']+Parameters['b']**2)
+        D_eff2 = 1/4*Parameters["GAMMA1_SHARE"]*(1-Parameters["GAMMA1_SHARE"])/(1+Parameters["GAMMA1_SHARE"])*Parameters['a']**2
     print("================================")
     print("Ds are : ")
     print("real value = {}  ||| computed value = {}".format(D_true, D_computed))
+    print("eff1 value = {}  ||| eff2 value = {}".format(D_eff1,D_eff2))
     print("Error :      {:.1%}".format(np.abs(D_true-D_computed)/D_true))
+    print("Error eff1 : {:.1%}  ||| Error eff2 : {:.1%}".format(np.abs(D_computed-D_eff1)/D_computed,np.abs(D_computed-D_eff2)/D_computed))
 
 
 
