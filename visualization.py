@@ -89,22 +89,45 @@ def Diffusion_plot(Parameters : dict, trajectory_vector : np.ndarray) -> None :
     
     fig, ax = plt.subplots(figsize = (16,9))
     ax.set_xlim(1,n)
-    ax.plot([1,n], MQV_true_table, label ="<[x(t0-t)-x(t0)]²> = Gamma1*Gamma2/Gamma*(a-2b)²t", color = "blue", 
-            linestyle = "solid")
+    ax.plot([1,n], MQV_true_table, label ="<[x(t0-t)-x(t0)]²> = Gamma1*Gamma2/Gamma*(a-2b)²t", color = "lightsteelblue", 
+            linestyle = "dotted")
     #
     ax.plot(taken_steps,MQV_compute, label = "Computed <[x(t0-t)-x(t0)]²> value", color = 'red', 
-            linestyle = "dotted", marker = "^")
-    ax.plot([1,n],MQV_eff1_table, label = "<[x(t0-t)-x(t0)]²> = Gamma1*Gamma2/Gamma*(a²+b²-2ab)t", color = 'forestgreen')
-    ax.plot([1,n],MQV_eff2_table, label = "<[x(t0-t)-x(t0)]²> = Gamma1*Gamma2/(2Gamma1+Gamma2)*a²t", color = 'black')
+            linestyle = "dashed", marker = "^")
+    ax.plot([1,n],MQV_eff1_table, label = "<[x(t0-t)-x(t0)]²> = Gamma1*Gamma2/Gamma*(a²+b²-2ab)t", color = 'cornflowerblue', linestyle = "dotted")
+    ax.plot([1,n],MQV_eff2_table, label = "<[x(t0-t)-x(t0)]²> = Gamma1*Gamma2/(2Gamma1+Gamma2)*a²t", color = 'royalblue')
 
     #
     ax.legend()
     ax.set_xlabel("steps (or time steps kt = t) ")
     ax.set_ylabel("<[x(t0-t)-x(t0)]²>")
-    ax.set_title(f"Diffusion coefficient D, with respect to time on a {Parameters["steps"]} trajectory")
+    ax.set_title("Diffusion coefficient D, with respect to time on a {} steps trajectory".format(Parameters["steps"]))
     if Parameters["custom load"]:
         plt.savefig(f"GAMMA1_SHARE_{Parameters['GAMMA1_SHARE']}/{Parameters['load path']}")
     else :
         plt.savefig(f"GAMMA1_SHARE_{Parameters['GAMMA1_SHARE']}/model{Parameters['Model']}_step_{Parameters['steps']}")
     
     
+def Diffusion_gamma(GAMMA_TABLE, D, Parameters) -> None :
+    fig, ax = plt.subplots(figsize = (16,9))
+
+    if Parameters["Model"] == 1 :
+        D_true = np.array([gamma+2*(1-gamma)*Parameters['a']**2 for gamma in GAMMA_TABLE])
+        D_true = 0.25*D_true 
+        ax.plot(GAMMA_TABLE, D_true, label = 'true')
+    else :
+        D_one = np.array([1/4*gamma*(1-gamma)*(Parameters['a']-2*Parameters["b"])**2 for gamma in GAMMA_TABLE])
+        D_two = np.array([1/4*gamma*(1-gamma)*(Parameters['a']**2-2*Parameters['a']*Parameters['b']+Parameters['b'])**2 for gamma in GAMMA_TABLE])
+        D_three = np.array([1/4*gamma*(1-gamma)/(1+gamma)*(Parameters['a'])**2 for gamma in GAMMA_TABLE])
+        ax.plot(GAMMA_TABLE, D_one, label = '1/4 * Gamma1*Gamma2/Gamma*(a-2b)²', color = "lightsteelblue", linestyle= "dotted") 
+        ax.plot(GAMMA_TABLE, D_two, label = '1/4 * Gamma1*Gamma2/Gamma*(a²+b²-2ab)', color = "cornflowerblue", linestyle = 'dotted')
+        ax.plot(GAMMA_TABLE, D_three, label = '1/4 * Gamma1*Gamma2/(2Gamma1+Gamma2)*a²', color= "royalblue")
+
+
+    ax.set_xlim(0,1)
+    ax.plot(GAMMA_TABLE, D, label = 'computed', color='red', linestyle='dotted', marker='o')
+    ax.set_xlabel("Gamma one values")
+    ax.set_ylabel("D/(GAMMA)")
+    ax.set_title("Diffusion coefficient D, with respect to gamma frequencies, on a {} steps trajectory".format(Parameters["steps"]))
+    ax.legend()
+    plt.savefig("D_gamma/figure_D")

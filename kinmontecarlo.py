@@ -101,10 +101,10 @@ def computeDiffusion_normalized(trajectory_vector:np.ndarray, Parameters: dict) 
     # We also exclude the first 20%, because at low time scales the hydrogen didn't mooved that much across the lattice
     # We exclude the last 20% because they have too less point to compute a statifying mean
     n = trajectory_vector.shape[0]
-    taken_steps = np.linspace(0.2*n,0.8*n,10, dtype = int)
+    taken_steps = np.linspace(n*0.001,0.01*n,3, dtype = int)
     for k_step in taken_steps:
         D_storage += MQV(trajectory_vector, k_step) / (4*k_step)
-    return D_storage / 10
+    return D_storage / 3
 
 
 
