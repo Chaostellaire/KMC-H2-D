@@ -30,30 +30,29 @@ Parameters = {
     "b" : 0.3,
 
     #~~ SIMULATION VARIABLES ~~
-    "Do sim" : False,
-    "load traj" : False, #bool, need to select correct parameter to load correct table
+    "Do sim" : False, #To do the main simulation, opposite to load_traj
+    "load traj" : False, #bool, need to select correct parameter to load correct table, bypass "Do sim"
     "load mqv": False, #bool, will trigger only if a trajectory load is prompted
     "custom load" : False, #bool, will trigger only if a trajectory load is prompted
     "custom save" : False, #bool, will use the structure ./GAMMA1/xxxxx
-    "load path" :"M2_10M_2", #str
+    "load path" :"M2_10M_2", #str, name of custom load/save
     
     "steps" : 10000000, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
-    "several trajectories": False, #bool, NOT IMPLEMENTED
-    "number trajectories": 5, #int, NOT IMPLEMENTED
-    "D_t_computation" : False, #bool
-    "D_gamma_computation" : True, #bool
+    "number trajectories": 10, #int,
+    "D_t_computation" : False, #bool, does D(t) comparison in terminal
+    "D_gamma_computation" : True, #bool, bypass "Do sim", store D(gamma) values
 
     
     
     #~~ SAVING PROPERTIES ~~#
-    "table save flag" : True,
+    "table save flag" : True, #bool, 
     "saving type" : "npy", #str, gives the format of saving of the tables. npy is recommanded #### "npy",  "dat", "txt"
 
     #~~ VISUALIZATION ~~
-    "animation" : False, #bool
-    "D_t_plot" : False, #bool 
-    "D_gamma_plot": True, #bool
-    "fps"  : 12, #int
+    "animation" : False, #bool, do animation
+    "D_t_plot" : False, #bool, plots D(t)
+    "D_gamma_plot": True, #bool, plots D(gamma)
+    "fps"  : 12, #int, animation speed
     
     
 }
@@ -87,7 +86,7 @@ elif Parameters["Do sim"]:
 if Parameters["animation"] :
     visu.animate_simulation(L, Parameters)
 if Parameters["D_t_plot"]:
-    visu.Diffusion_plot(Parameters,L)
+    visu.Diffusion_time(Parameters)
 
 
     
@@ -126,7 +125,7 @@ if Parameters["D_gamma_computation"]:
     os.makedirs('D_gamma', exist_ok=True)
 
     #Table to store D
-    gamma_table = np.arange(0.05,0.95,0.05)
+    gamma_table = np.arange(0.05,1,0.05)
     i = 0
     D_table = np.zeros_like(gamma_table)
     for gamma in gamma_table :
@@ -136,7 +135,7 @@ if Parameters["D_gamma_computation"]:
             L = KMC.trajectory_1(Parameters)        
         if Parameters["Model"] == 2:  
             L = KMC.trajectory_2(Parameters)[:,0]
-        np.save(f"D_gamma/traj_{gamma:.3f}_{Parameters['steps']/100000}step",L)
+        np.save(f"D_gamma/traj_{gamma:.3f}_{Parameters['steps']/1000000}Mstep",L)
         
         print("computing D")
         D_curr = KMC.computeDiffusion_normalized(L, Parameters)
@@ -144,11 +143,11 @@ if Parameters["D_gamma_computation"]:
         D_table[i] = D_curr
         i+=1
         print("======================================")
-    np.save('D_gamma/D_values', D_table)
+    np.save(f"D_gamma/D_values_{Parameters['steps']/1000000}Mstep", D_table)
 
 if Parameters["D_gamma_plot"]:
-    D_table = np.load("D_gamma/D_values.npy")
-    gamma_table = np.arange(0.05,0.95,0.05)
+    D_table = np.load(f"D_gamma/D_values_{Parameters['steps']/1000000}Mstep.npy")
+    gamma_table = np.arange(0.05,1,0.05)
     
     visu.Diffusion_gamma(gamma_table,D_table,Parameters)
         

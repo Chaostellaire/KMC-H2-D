@@ -1,9 +1,12 @@
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+import matplotlib.colors as mcolors
 import numpy as np
 from kinmontecarlo import MQV
 import savings
 import os
+
+COMPUTED_COLOR = ["lightcoral", "tomato", "red", "firebrick", "maroon","peachpuff","gold","darkorange","peru","dark"]
 
 def animate_simulation(L : np.ndarray, Parameters : dict) -> None:
         # Create the figure and axis
@@ -55,7 +58,11 @@ def animate_simulation(L : np.ndarray, Parameters : dict) -> None:
         os.makedirs(directory_path, exist_ok=True)
         ani.save(f"{directory_path}/anim_steps{Parameters['steps']}_fps{Parameters['fps']}.mp4", writer=writervideo)
 
-def Diffusion_plot(Parameters : dict, trajectory_vector : np.ndarray) -> None :
+def Diffusion_time(Parameters: dict, L:np.ndarray) -> None :
+    Diffusion_time(Parameters, L)
+
+
+def Diffusion_onesim(Parameters : dict, trajectory_vector : np.ndarray) -> None :
     if Parameters["Model"] == 1:
         D_true = 1/4*(Parameters["GAMMA1_SHARE"]*1+(1-Parameters["GAMMA1_SHARE"])*2) 
     else :
@@ -107,27 +114,41 @@ def Diffusion_plot(Parameters : dict, trajectory_vector : np.ndarray) -> None :
     else :
         plt.savefig(f"GAMMA1_SHARE_{Parameters['GAMMA1_SHARE']}/model{Parameters['Model']}_step_{Parameters['steps']}")
     
-    
+
 def Diffusion_gamma(GAMMA_TABLE, D, Parameters) -> None :
     fig, ax = plt.subplots(figsize = (16,9))
 
     if Parameters["Model"] == 1 :
         D_true = np.array([gamma+2*(1-gamma)*Parameters['a']**2 for gamma in GAMMA_TABLE])
-        D_true = 0.25*D_true 
-        ax.plot(GAMMA_TABLE, D_true, label = 'true')
+        D_true = 0.25*Parameters["GAMMA"]*D_true 
+        ax.plot(GAMMA_TABLE*Parameters["GAMMA"], D_true, label = 'true')
     else :
-        D_one = np.array([1/4*gamma*(1-gamma)*(Parameters['a']-2*Parameters["b"])**2 for gamma in GAMMA_TABLE])
-        D_two = np.array([1/4*gamma*(1-gamma)*(Parameters['a']**2-2*Parameters['a']*Parameters['b']+Parameters['b'])**2 for gamma in GAMMA_TABLE])
-        D_three = np.array([1/4*gamma*(1-gamma)/(1+gamma)*(Parameters['a'])**2 for gamma in GAMMA_TABLE])
-        ax.plot(GAMMA_TABLE, D_one, label = '1/4 * Gamma1*Gamma2/Gamma*(a-2b)²', color = "lightsteelblue", linestyle= "dotted") 
-        ax.plot(GAMMA_TABLE, D_two, label = '1/4 * Gamma1*Gamma2/Gamma*(a²+b²-2ab)', color = "cornflowerblue", linestyle = 'dotted')
-        ax.plot(GAMMA_TABLE, D_three, label = '1/4 * Gamma1*Gamma2/(2Gamma1+Gamma2)*a²', color= "royalblue")
+        D_one = np.array([Parameters["GAMMA"]*1/4*gamma*(1-gamma)*(Parameters['a']-2*Parameters["b"])**2 for gamma in GAMMA_TABLE])
+        D_two = np.array([Parameters["GAMMA"]*1/4*gamma*(1-gamma)*(Parameters['a']**2-2*Parameters['a']*Parameters['b']+Parameters['b'])**2 for gamma in GAMMA_TABLE])
+        D_three = np.array([Parameters["GAMMA"]*1/4*gamma*(1-gamma)/(1+gamma)*(Parameters['a'])**2 for gamma in GAMMA_TABLE])
+        ax.plot(GAMMA_TABLE*Parameters["GAMMA"], D_one, label = '$D = 1/4 \\ \\frac{\Gamma_1\\Gamma_2}{\\Gamma} (a-2b)^2 $', color = "lightsteelblue", linestyle= "dotted") 
+        ax.plot(GAMMA_TABLE*Parameters["GAMMA"], D_two, label = '$D = 1/4 \\ \\frac{\\Gamma_1\\Gamma_2}{\\Gamma} (a^2+b^2-2ab)$', color = "cornflowerblue", linestyle = 'dotted')
+        ax.plot(GAMMA_TABLE*Parameters["GAMMA"], D_three, label = '$D = 1/4 \\  \\frac{\\Gamma_1\\Gamma_2}{2\\Gamma_1+\\Gamma_2}a^2$', color= "royalblue")
 
+    axup = ax.twiny()
+    ax.set_xlim(0,Parameters["GAMMA"])
+    axup.set_xlim(0,Parameters["GAMMA"])
+    axup.set_xlabel("$\\Gamma_2$")
+    ax.grid()
+    ax.set_xticks(GAMMA_TABLE*Parameters["GAMMA"])
+    axup.set_xticks(np.subtract(1,GAMMA_TABLE)*Parameters["GAMMA"])
+    ax.plot(GAMMA_TABLE*Parameters["GAMMA"], D*Parameters["GAMMA"], label = 'computed', color='red', linestyle='dotted', marker='o')
+    ax.set_xlabel("$\\Gamma_1$")
+    ax.set_ylabel("D")
+    ax.set_title("Diffusion coefficient D, with respect to gamma frequencies, on a {}M steps trajectory \n".format(Parameters["steps"]/1000000))
+    ax.text(0.03,0.97,f'''$\\Gamma = {Parameters["GAMMA"]}$''',transform=ax.transAxes, fontsize = 15, verticalalignment='top', bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
 
-    ax.set_xlim(0,1)
-    ax.plot(GAMMA_TABLE, D, label = 'computed', color='red', linestyle='dotted', marker='o')
-    ax.set_xlabel("Gamma one values")
-    ax.set_ylabel("D/(GAMMA)")
-    ax.set_title("Diffusion coefficient D, with respect to gamma frequencies, on a {} steps trajectory".format(Parameters["steps"]))
-    ax.legend()
+    ax.legend(fontsize = 15)
+
     plt.savefig("D_gamma/figure_D")
+
+def choose_color_computed(nb:int) -> list[str] :
+    if nb <= len(COMPUTED_COLOR) :
+        return COMPUTED_COLOR[:nb]
+    else :
+        return mcolors.CSS4_COLORS.keys()
