@@ -29,11 +29,11 @@ Parameters = {
     "b" : 0.3,
 
     #~~ SIMULATION VARIABLES ~~
-    "load traj" : False, #bool, need to select correct parameter to load correct table
+    "load traj" : True, #bool, need to select correct parameter to load correct table
     "load mqv": False, #bool, will trigger only if a trajectory load is prompted
-    "custom load" : False, #bool, will trigger only if a trajectory load is prompted
+    "custom load" : True, #bool, will trigger only if a trajectory load is prompted
     "custom save" : False, #bool, will use the structure ./GAMMA1/xxxxx
-    "load path" :"M2_10M_4", #str
+    "load path" :"M2_10M_2", #str
     
     "steps" : 20000000, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
     "several trajectories": False, #bool
@@ -96,7 +96,7 @@ if Parameters["D_computation"] :
         else:
             MQV_computed = np.load("GAMMA1_SHARE_{}/model{}_step_{}_mqv.npy".format(Parameters["GAMMA1_SHARE"],Parameters['Model'], Parameters["steps"]))[0]
             taken_steps = np.load("GAMMA1_SHARE_{}/model{}_step_{}_mqv.npy".format(Parameters["GAMMA1_SHARE"],Parameters['Model'], Parameters["steps"]))[1]
-            
+            D_computed = np.mean(np.divide(MQV_computed,taken_steps))
     else:
         D_computed = KMC.computeDiffusion_normalized(L,Parameters)
 
