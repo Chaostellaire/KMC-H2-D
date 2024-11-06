@@ -18,12 +18,12 @@ import numpy as np
 
 Parameters = {
 
-    "Model" : 2,
+    "Model" : 1,
 
     #~~ OVERALL SYSTEM PROPERTIES ~~
     
     "GAMMA" : 1, #float, dimensionnal value for GAMMAs. [Hz]
-    "GAMMA1_SHARE" : 0.03, #float, GAMMA1/GAMMA, share of GAMMA1, GAMMA2_share = 1-GAMMA1/GAMMA. To get back to dimensionnal values we just need to multiply by GAMMA.
+    "GAMMA1_SHARE" : 0.5, #float, GAMMA1/GAMMA, share of GAMMA1, GAMMA2_share = 1-GAMMA1/GAMMA. To get back to dimensionnal values we just need to multiply by GAMMA.
 
     "a" : 1,
     "b" : 0.3,
@@ -38,9 +38,9 @@ Parameters = {
 
     #~~ VISUALIZATION ~~
     "animation" : False, #bool
-    "D_plot" : True, #bool 
+    "D_plot" : False, #bool 
     "fps"  : 12, #int
-    "D_computation" : True, #bool
+    "D_computation" : False, #bool
 }
 
 
