@@ -31,21 +31,20 @@ Parameters = {
 
     #~~ SIMULATION VARIABLES ~~
     "Do sim" : False, #To do the main simulation, opposite to load_traj
-    "load traj" : False, #bool, need to select correct parameter to load correct table, bypass "Do sim"
-    "load mqv": False, #bool, will trigger only if a trajectory load is prompted
-    "custom load" : False, #bool, will trigger only if a trajectory load is prompted
-    "custom save" : False, #bool, will use the structure ./GAMMA1/xxxxx
-    "load path" :"M2_10M_2", #str, name of custom load/save
+    "load": True, #bool, will trigger only if a trajectory load is prompted
     
-    "steps" : 10000000, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
-    "number trajectories": 10, #int,
+    "steps" : 1000000, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
+    "number trajectories": 3, #int, 
     "D_t_computation" : False, #bool, does D(t) comparison in terminal
     "D_gamma_computation" : True, #bool, bypass "Do sim", store D(gamma) values
 
     
     
     #~~ SAVING PROPERTIES ~~#
-    "table save flag" : True, #bool, 
+    "custom load" : False, #bool, will trigger only if a trajectory load is prompted
+    "custom save" : False, #bool, will use the structure ./GAMMA1/xxxxx
+    
+    "load path" :"M2_10M_2", #str, name of custom load/save
     "saving type" : "npy", #str, gives the format of saving of the tables. npy is recommanded #### "npy",  "dat", "txt"
 
     #~~ VISUALIZATION ~~
@@ -60,31 +59,37 @@ Parameters = {
 
 start = time()
 
+Parameters["current trajectory"] = 1
 
-
-if Parameters["load traj"] :
+if Parameters["load"] :
     if Parameters["custom load"]:
-        L = np.load(f"GAMMA1_SHARE_{Parameters['GAMMA1_SHARE']}/{Parameters['load path']}_traj.{Parameters['saving type']}")
+        L = savs.loadtraj(Parameters)
     else:
-        L = np.load("GAMMA1_SHARE_{}/model{}_step_{}_traj.npy".format(Parameters["GAMMA1_SHARE"],Parameters['Model'], Parameters["steps"]))
-elif Parameters["Do sim"]:
-    if Parameters["Model"] == 1:
-        L = KMC.trajectory_1(Parameters)
-        compute_time = time() - start
-        print("computation of trajectory done at {}".format(compute_time))
-        
-    if Parameters["Model"] == 2:  
-        L = KMC.trajectory_2(Parameters)[:,0]
-        compute_time = time() - start
-        print("computation of trajectory done at {}".format(compute_time))
+        L = savs.loadtraj(Parameters)
+if Parameters["Do sim"]:
+    for i in range(1, Parameters["number trajectories"]+1):
+        Parameters["current trajectory"] = i
 
-    if Parameters["table save flag"] :
+        if Parameters["Model"] == 1:
+            L = KMC.trajectory_1(Parameters)
+            compute_time = time() - start
+            print("computation of trajectory done at {}".format(compute_time))
+            
+        if Parameters["Model"] == 2:  
+            L = KMC.trajectory_2(Parameters)[:,0]
+            compute_time = time() - start
+            print("computation of trajectory done at {}".format(compute_time))
         savs.save2file(Parameters,L,"traj")
-        print("time to save : {}".format( time()-compute_time ))
+
+        print("computing relevant values for MQV")
+        n = L.shape[0]*0.02
+        taken_steps = np.linspace(n/20,n,20, dtype = int)
+        mqv = KMC.MQV_table(L,taken_steps)
+        savs.save2file(Parameters,np.stack((mqv, taken_steps),axis = 0),"mqv")
 
 
 if Parameters["animation"] :
-    visu.animate_simulation(L, Parameters)
+    visu.animate_simulation(Parameters)
 if Parameters["D_t_plot"]:
     visu.Diffusion_time(Parameters)
 
@@ -95,7 +100,7 @@ if Parameters["D_t_plot"]:
 
 
 if Parameters["D_t_computation"] : 
-    if Parameters["load mqv"]:
+    if Parameters["load"]:
         if Parameters["custom load"]:
             MQV_computed = np.load(f"GAMMA1_SHARE_{Parameters['GAMMA1_SHARE']}/{Parameters['load path']}_mqv.{Parameters['saving type']}")[0]
             taken_steps = np.load(f"GAMMA1_SHARE_{Parameters['GAMMA1_SHARE']}/{Parameters['load path']}_mqv.{Parameters['saving type']}")[1]

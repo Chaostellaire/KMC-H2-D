@@ -90,6 +90,9 @@ def MQV(trajectory_vector : np.ndarray, k_step:int) -> float :
     print("I finished in {}".format(time()-start))
     return result_MQV/(n-k_step)
 
+def MQV_table(trajectory_vector:np.ndarray, taken_steps:np.ndarray) -> None :
+    MQV_compute = np.array([MQV(trajectory_vector, k) for k in taken_steps])
+    return MQV_compute
 
 
 def computeDiffusion_normalized(trajectory_vector:np.ndarray, Parameters: dict) -> float:

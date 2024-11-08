@@ -8,61 +8,103 @@ import os
 
 COMPUTED_COLOR = ["lightcoral", "tomato", "red", "firebrick", "maroon","peachpuff","gold","darkorange","peru","dark"]
 
-def animate_simulation(L : np.ndarray, Parameters : dict) -> None:
-        # Create the figure and axis
-        print("HELLO")
-        fig, ax = plt.subplots()
+def animate_simulation(Parameters : dict) -> None:
+    #load table
+    L = savings.loadtraj(Parameters,'traj')
+    # Create the figure and axis
+    print("HELLO")
+    fig, ax = plt.subplots()
 
-        # Set limits for the grid centered at (0, 0)
-        x_min = min([x for x, y in L]) - 1
-        x_max = max([x for x, y in L]) + 1
-        y_min = min([y for x, y in L]) - 1
-        y_max = max([y for x, y in L]) + 1
+    # Set limits for the grid centered at (0, 0)
+    x_min = min([x for x, y in L]) - 1
+    x_max = max([x for x, y in L]) + 1
+    y_min = min([y for x, y in L]) - 1
+    y_max = max([y for x, y in L]) + 1
 
-        ax.set_xlim(x_min, x_max)
-        ax.set_ylim(y_min, y_max)
+    ax.set_xlim(x_min, x_max)
+    ax.set_ylim(y_min, y_max)
 
-        # Initialize the grid and atom position
-        atom, = ax.plot([], [], 'ro')  # Red dot for the atom
+    # Initialize the grid and atom position
+    atom, = ax.plot([], [], 'ro')  # Red dot for the atom
 
-        # Set grid lines
-        m = round(min(x_min, y_min))-1
-        M = round(max(x_max, y_max))+1
-        ax.set_xticks(range(m, M + 1))
-        ax.set_yticks(range(m, M + 1))
-        ax.grid(True)
+    # Set grid lines
+    m = round(min(x_min, y_min))-1
+    M = round(max(x_max, y_max))+1
+    ax.set_xticks(range(m, M + 1))
+    ax.set_yticks(range(m, M + 1))
+    ax.grid(True)
 
-        # Add x and y axis lines crossing at (0, 0)
-        ax.axhline(0, color='black',linewidth=0.5)
-        ax.axvline(0, color='black',linewidth=0.5)
+    # Add x and y axis lines crossing at (0, 0)
+    ax.axhline(0, color='black',linewidth=0.5)
+    ax.axvline(0, color='black',linewidth=0.5)
 
-        # Initialization function
-        def init():
-            atom.set_data([], [])
-            return atom,
+    # Initialization function
+    def init():
+        atom.set_data([], [])
+        return atom,
 
-        # Animation function
-        def animate(i):
-            x, y = L[i]
-            atom.set_data([x], [y])
-            return atom,
+    # Animation function
+    def animate(i):
+        x, y = L[i]
+        atom.set_data([x], [y])
+        return atom,
 
-        # Initialize writer for saving the video
-        writervideo = animation.FFMpegWriter(fps=Parameters['fps'])  # Ensure ffmpeg is installed
+    # Initialize writer for saving the video
+    writervideo = animation.FFMpegWriter(fps=Parameters['fps'])  # Ensure ffmpeg is installed
 
-        # Create the animation
-        ani = animation.FuncAnimation(fig, animate, frames=len(L), init_func=init, blit=True)
+    # Create the animation
+    ani = animation.FuncAnimation(fig, animate, frames=len(L), init_func=init, blit=True)
+    
+    # Save the animation
+    directory_path = f"GAMMA1_SHARE_{Parameters['GAMMA1_SHARE']}"
+    os.makedirs(directory_path, exist_ok=True)
+    ani.save(f"{directory_path}/anim_steps{Parameters['steps']}_fps{Parameters['fps']}.mp4", writer=writervideo)
+
+def Diffusion_time(Parameters: dict) -> None :
+    fig,ax = plt.subplots(figsize = (16,9))
+    color_choice = choose_color_computed(Parameters["number trajectories"])
+    n = (Parameters['steps']+1)*0.02
+    for i in range(1,Parameters["number trajectories"]+1):
+        Parameters["current trajectory"] = i
+        MQV_compute= savings.loadmqv(Parameters)[0]
+        taken_steps = savings.loadmqv(Parameters)[1]
         
-        # Save the animation
-        directory_path = f"GAMMA1_SHARE_{Parameters['GAMMA1_SHARE']}"
-        os.makedirs(directory_path, exist_ok=True)
-        ani.save(f"{directory_path}/anim_steps{Parameters['steps']}_fps{Parameters['fps']}.mp4", writer=writervideo)
+    
+    
+        ax.plot(taken_steps, MQV_compute,label = f"Computed <[x(t0-t)-x(t0)]²> value, traj{i}", color = color_choice[i], 
+        linestyle = "dashed", marker = "^")
+    #end for
+    if Parameters["Model"] == 1:
+        D_true = 1/4*(Parameters["GAMMA1_SHARE"]*1+(1-Parameters["GAMMA1_SHARE"])*2) 
+    else :
+        D_true = 1/4*(Parameters["GAMMA1_SHARE"]*(1-Parameters["GAMMA1_SHARE"])) * (Parameters['a']-2*Parameters['b'])**2
+        MQV_true_table = [4*D_true*1,4*D_true*n]
+        D_eff1 = 1/4*(Parameters["GAMMA1_SHARE"]*(1-Parameters["GAMMA1_SHARE"])) * (Parameters['a']**2-2*Parameters['a']*Parameters['b']+Parameters['b']**2)
+        MQV_eff1_table = [4*D_eff1*1,4*D_eff1*n]
+        D_eff2 = 1/4*Parameters["GAMMA1_SHARE"]*(1-Parameters["GAMMA1_SHARE"])/(1+Parameters["GAMMA1_SHARE"])*Parameters['a']**2
+        MQV_eff2_table = [4*D_eff2*1,4*D_eff2*n]
+        ax.plot([1,n], MQV_true_table, label ="<[x(t0-t)-x(t0)]²> = Gamma1*Gamma2/Gamma*(a-2b)²t", color = "lightsteelblue", 
+        linestyle = "dotted")
+        ax.plot([1,n],MQV_eff1_table, label = "<[x(t0-t)-x(t0)]²> = Gamma1*Gamma2/Gamma*(a²+b²-2ab)t", color = 'cornflowerblue', linestyle = "dotted")
+        ax.plot([1,n],MQV_eff2_table, label = "<[x(t0-t)-x(t0)]²> = Gamma1*Gamma2/(2Gamma1+Gamma2)*a²t", color = 'royalblue')
 
-def Diffusion_time(Parameters: dict, L:np.ndarray) -> None :
-    Diffusion_time(Parameters, L)
 
+    ax.legend()
+    ax.set_xlabel("steps (or time steps kt = t)")
+    ax.set_ylabel("<[x(t0-t)-x(t0)]²>")
+    ax.set_title("Diffusion coefficient D, with respect to time on a {:,d} steps trajectory".format(Parameters["steps"]))
+    plt.show()
+    if Parameters["custom load"]:
+        plt.savefig(f"GAMMA1_SHARE_{Parameters['GAMMA1_SHARE']}/{Parameters['load path']}")
+    else :
+        plt.savefig(f"GAMMA1_SHARE_{Parameters['GAMMA1_SHARE']}/model{Parameters['Model']}_step_{Parameters['steps']}")
+    
+        
+        
 
-def Diffusion_onesim(Parameters : dict, trajectory_vector : np.ndarray) -> None :
+def Diffusion_onesim(Parameters : dict) -> None :
+    #load traj
+    trajectory_vector = savings.loadfromfile(Parameters,'traj')
     if Parameters["Model"] == 1:
         D_true = 1/4*(Parameters["GAMMA1_SHARE"]*1+(1-Parameters["GAMMA1_SHARE"])*2) 
     else :
@@ -71,7 +113,7 @@ def Diffusion_onesim(Parameters : dict, trajectory_vector : np.ndarray) -> None 
     #O(n²)
     #We only care about the first percents of the trajectory
     n = trajectory_vector.shape[0]*0.02
-    if Parameters["load mqv"] and Parameters["load traj"]:
+    if not Parameters["load"]:
         if Parameters["custom load"]:
             MQV_compute= np.load(f"GAMMA1_SHARE_{Parameters['GAMMA1_SHARE']}/{Parameters['load path']}_mqv.{Parameters['saving type']}")[0]
             taken_steps = np.load(f"GAMMA1_SHARE_{Parameters['GAMMA1_SHARE']}/{Parameters['load path']}_mqv.{Parameters['saving type']}")[1]
@@ -149,6 +191,6 @@ def Diffusion_gamma(GAMMA_TABLE, D, Parameters) -> None :
 
 def choose_color_computed(nb:int) -> list[str] :
     if nb <= len(COMPUTED_COLOR) :
-        return COMPUTED_COLOR[:nb]
+        return COMPUTED_COLOR
     else :
         return mcolors.CSS4_COLORS.keys()
