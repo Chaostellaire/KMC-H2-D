@@ -19,7 +19,7 @@ import numpy as np
 
 Parameters = {
 
-    "Model" : 2,
+    "Model" : 1,
 
     #~~ OVERALL SYSTEM PROPERTIES ~~
     
@@ -31,11 +31,11 @@ Parameters = {
 
     #~~ SIMULATION VARIABLES ~~
     "Do sim" : False, #To do the main simulation, opposite to load_traj
-    "load": True, #bool, will trigger only if a trajectory load is prompted
+    "load": False, #bool, will trigger only if a trajectory load is prompted
     
-    "steps" : 1000000, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
-    "number trajectories": 3, #int, 
-    "D_t_computation" : False, #bool, does D(t) comparison in terminal
+    "steps" : 10000000, #int, step number for simulation, output is size steps+1 (storing starting (0,0) position)
+    "number trajectories": 1, #int, 
+    "D_t_computation" : False, #bool, 
     "D_gamma_computation" : True, #bool, bypass "Do sim", store D(gamma) values
 
     
@@ -50,6 +50,7 @@ Parameters = {
     #~~ VISUALIZATION ~~
     "animation" : False, #bool, do animation
     "D_t_plot" : False, #bool, plots D(t)
+    "D_t_terminal": False, #does D(t) comparison in terminal
     "D_gamma_plot": True, #bool, plots D(gamma)
     "fps"  : 12, #int, animation speed
     
@@ -82,8 +83,18 @@ if Parameters["Do sim"]:
         savs.save2file(Parameters,L,"traj")
 
         print("computing relevant values for MQV")
-        n = L.shape[0]*0.02
+        n = L.shape[0]*0.002
         taken_steps = np.linspace(n/20,n,20, dtype = int)
+        mqv = KMC.MQV_table(L,taken_steps)
+        savs.save2file(Parameters,np.stack((mqv, taken_steps),axis = 0),"mqv")
+
+if Parameters["D_t_computation"] : 
+    for i in range(1, Parameters["number trajectories"]+1):
+        Parameters["current trajectory"] = i
+        L = savs.loadtraj(Parameters)
+        print("computing relevant values for MQV")
+        n = L.shape[0]*0.002
+        taken_steps = np.linspace(n/5,n,5, dtype = int)
         mqv = KMC.MQV_table(L,taken_steps)
         savs.save2file(Parameters,np.stack((mqv, taken_steps),axis = 0),"mqv")
 
@@ -99,7 +110,7 @@ if Parameters["D_t_plot"]:
 
 
 
-if Parameters["D_t_computation"] : 
+if Parameters["D_t_terminal"] : 
     if Parameters["load"]:
         if Parameters["custom load"]:
             MQV_computed = np.load(f"GAMMA1_SHARE_{Parameters['GAMMA1_SHARE']}/{Parameters['load path']}_mqv.{Parameters['saving type']}")[0]
@@ -133,6 +144,7 @@ if Parameters["D_gamma_computation"]:
     gamma_table = np.arange(0.05,1,0.05)
     i = 0
     D_table = np.zeros_like(gamma_table)
+    taken_steps = np.arange(10000, 22000, 4000)
     for gamma in gamma_table :
         Parameters["GAMMA1_SHARE"] = gamma
         print(f"Generating trajectory for GAMMA1 = {gamma}")
@@ -143,7 +155,7 @@ if Parameters["D_gamma_computation"]:
         np.save(f"D_gamma/traj_{gamma:.3f}_{Parameters['steps']/1000000}Mstep",L)
         
         print("computing D")
-        D_curr = KMC.computeDiffusion_normalized(L, Parameters)
+        D_curr = KMC.computeDiffusion_normalized(L, taken_steps)
         print(f"D = {D_curr}")
         D_table[i] = D_curr
         i+=1
